@@ -88,6 +88,9 @@ target
 *.bloop
 metals.sbt
 
+# Tensorboard logs
+tb-logger
+
 # Vim swap files
 *.swp
 
