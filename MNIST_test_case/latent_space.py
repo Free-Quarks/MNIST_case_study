@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 from multiprocessing import Pool
+import pandas as pd
 
 # config
 PRINT_DATA_DIST = False
@@ -124,10 +125,13 @@ if __name__ == "__main__":
     klds_9 = []
     if GENERATE_SAMPLE_KLDS:
         for label, gaussian in latent_gaussians:
-            klds_9.append((label, kl_divergence(gaussian, gaussian_9)))
-        torch.save(klds_9, './MNIST_test_case/saved_distributions/klds.pt')
+            klds_9.append((label, kl_divergence(gaussian, gaussian_9).item()))
+        df_klds_9 = pd.DataFrame(data=klds_9)
+        df_klds_9.to_parquet('./MNIST_test_case/saved_distributions/klds.parquet.snappy')
+        #torch.save(klds_9, './MNIST_test_case/saved_distributions/klds.pt')
     else:
-        klds_9 = torch.load('./MNIST_test_case/saved_distributions/klds.pt')
+        #klds_9 = torch.load('./MNIST_test_case/saved_distributions/klds.pt')
+        klds_9 = pd.read_parquet('./MNIST_test_case/saved_distributions/klds.parquet.snappy').to_numpy()
     
 
     # need to convert the torch tensors to np arrays for plotting
@@ -135,7 +139,7 @@ if __name__ == "__main__":
     for label, kld in klds_9:
         entry = []
         entry.append(label)
-        entry.append(kld.item())
+        entry.append(kld)
         plotting_list.append(entry)
     
     # convert to numpy array
@@ -154,9 +158,13 @@ if __name__ == "__main__":
             for _, gaussian in latent_gaussians:
                 klds_9.append(kl_divergence(gaussian, gaussian_9).item())
             klds_9_by_9less.append(klds_9)
-        torch.save(klds_9_by_9less, './MNIST_test_case/saved_distributions/klds_matrix.pt')
+        df_klds_9_by_9less = pd.DataFrame(data=klds_9_by_9less)
+        df_klds_9_by_9less.to_parquet('./MNIST_test_case/saved_distributions/klds_matrix.parquet.snappy')
+        #torch.save(klds_9_by_9less, './MNIST_test_case/saved_distributions/klds_matrix.pt')
     else:
-        klds_9_by_9less = torch.load('./MNIST_test_case/saved_distributions/klds_matrix.pt')
+        #klds_9_by_9less = torch.load('./MNIST_test_case/saved_distributions/klds_matrix.pt')
+        klds_9_by_9less = pd.read_parquet('./MNIST_test_case/saved_distributions/klds_matrix.parquet.snappy').to_numpy()
+        
 
     if PLOTTING_SAMPLE9:
         # plotting
@@ -193,9 +201,12 @@ if __name__ == "__main__":
                 klds_1_by_1.append(klds_1)
 
             savable_slice = klds_1_by_1[:-1] # last entry is empty due to conditional
-            torch.save(savable_slice, './MNIST_test_case/saved_distributions/klds_matrix_1s.pt')
+            df_savable_slice = pd.DataFrame(data=savable_slice)
+            df_savable_slice.to_parquet('./MNIST_test_case/saved_distributions/klds_matrix_1s.parquet.snappy')
+            #torch.save(savable_slice, './MNIST_test_case/saved_distributions/klds_matrix_1s.pt')
         else:
-            klds_1_by_1 = torch.load('./MNIST_test_case/saved_distributions/klds_matrix_1s.pt')
+            #klds_1_by_1 = torch.load('./MNIST_test_case/saved_distributions/klds_matrix_1s.pt')
+            klds_1_by_1 = pd.read_parquet('./MNIST_test_case/saved_distributions/klds_matrix_1s.parquet.snappy').to_numpy()
 
         min_list1 = []
         for row in klds_1_by_1:
